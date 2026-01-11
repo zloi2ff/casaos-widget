@@ -190,11 +190,12 @@ export const className = `
   }
 `;
 
-export const initialState = { activeTab: 'ram', output: '' };
+export const initialState = { activeTab: 'ram', output: '', collapsed: false };
 
 export const updateState = (event, prev) => {
   if (event.type === 'UB/COMMAND_RAN') return { ...prev, output: event.output };
   if (event.type === 'TAB_CLICK') return { ...prev, activeTab: event.tab };
+  if (event.type === 'TOGGLE_COLLAPSE') return { ...prev, collapsed: !prev.collapsed };
   return prev;
 };
 
@@ -290,7 +291,7 @@ const cpuCol = (p) => p > 80 ? '#ff6b6b' : p > 50 ? '#fbbf24' : '#22d3ee';
 const ramCol = (p) => p > 80 ? '#ff6b6b' : p > 60 ? '#fbbf24' : '#4ade80';
 const diskCol = (p) => p > 85 ? '#ff6b6b' : p > 70 ? '#fbbf24' : '#4ade80';
 
-export const render = ({ output, activeTab }, dispatch) => {
+export const render = ({ output, activeTab, collapsed }, dispatch) => {
   if (!output || !output.trim()) {
     return <div className="widget"><div className="offline">🔌 Server unavailable</div></div>;
   }
@@ -307,11 +308,26 @@ export const render = ({ output, activeTab }, dispatch) => {
 
   const cpuSub = d.power !== '--' ? `${d.power}W / ${d.temp}°C` : `${d.temp}°C`;
 
+  if (collapsed) {
+    return (
+      <div className="widget">
+        <div className="header" style={{borderBottom:'none'}}>
+          <span>System Status</span>
+          <span
+            style={{opacity:0.6,fontSize:12,cursor:'pointer',padding:'4px'}}
+            onClick={() => dispatch({type:'TOGGLE_COLLAPSE'})}>▶</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="widget">
       <div className="header">
         <span>System Status</span>
-        <span style={{opacity:0.4,fontSize:12}}>▼</span>
+        <span
+          style={{opacity:0.4,fontSize:12,cursor:'pointer',padding:'4px'}}
+          onClick={() => dispatch({type:'TOGGLE_COLLAPSE'})}>▼</span>
       </div>
 
       <div className="section">
