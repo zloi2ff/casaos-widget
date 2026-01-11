@@ -8,9 +8,11 @@ A beautiful macOS desktop widget that displays real-time system statistics from 
 
 - **CPU Usage** - Real-time CPU percentage with temperature
 - **RAM Usage** - Memory usage matching CasaOS calculations
-- **Docker Containers** - List of running containers with CPU/RAM usage
-- **Storage** - Disk usage for system and external drives
-- **HDD Temperature** - External drive temperature via SMART
+- **Docker Containers** - Dynamic list of running containers with CPU/RAM usage
+- **Storage** - Auto-detected disks with usage and temperature
+- **Collapsible** - Click arrow to collapse/expand widget
+- **Localization** - Auto-detects system language (English, Ukrainian, Russian)
+- **Live Updates** - Refreshes every 6 seconds, containers appear/disappear automatically
 
 ## Requirements
 
@@ -28,7 +30,7 @@ Download and install [Übersicht](http://tracesof.net/uebersicht/)
 
 ```bash
 cd ~/Library/Application\ Support/Übersicht/widgets/
-git clone https://github.com/YOUR_USERNAME/casaos-widget.git casaos.widget
+git clone https://github.com/zloi2ff/casaos-widget.git casaos.widget
 ```
 
 ### 3. Set up SSH key authentication
@@ -54,7 +56,6 @@ Edit `config.sh` with your server details:
 SERVER_HOST="192.168.1.100"      # Your CasaOS server IP
 SERVER_USER="your_username"      # SSH username
 SUDO_PASS="your_password"        # For docker stats (optional)
-EXTERNAL_DISK="/media/your-disk" # External disk path (optional)
 ```
 
 ### 5. Make script executable
@@ -65,7 +66,7 @@ chmod +x fetch-stats.sh
 
 ### 6. Update widget path
 
-Edit `casaos.jsx` and update the `widgetPath` variable on line 6 to match your username:
+Edit `casaos.jsx` and update the `widgetPath` variable to match your username:
 
 ```javascript
 const widgetPath = `/Users/YOUR_USERNAME/Library/Application\\ Support/Übersicht/widgets/casaos.widget`;
@@ -81,8 +82,30 @@ Click the Übersicht menu bar icon and select "Refresh All Widgets"
 |--------|-------------|
 | `SERVER_HOST` | IP address or hostname of your CasaOS server |
 | `SERVER_USER` | SSH username |
-| `SUDO_PASS` | Password for sudo (needed for docker stats and HDD temp) |
-| `EXTERNAL_DISK` | Mount path of external disk (leave empty if none) |
+| `SUDO_PASS` | Password for sudo (needed for docker stats and disk temp) |
+
+## Features in Detail
+
+### Auto-detected Disks
+The widget automatically detects all mounted disks on your server and displays:
+- Usage percentage with color-coded progress bar
+- Used/Total space
+- Temperature (if available via SMART)
+
+### Dynamic Container List
+- Only shows currently running containers
+- Containers appear when started, disappear when stopped
+- Switch between CPU and RAM view with tabs
+- Sorted by memory usage
+
+### Collapsible Widget
+Click the arrow (▼/▶) in the header to collapse or expand the widget.
+
+### Localization
+The widget automatically detects your macOS system language and displays text in:
+- English (default)
+- Ukrainian (uk)
+- Russian (ru)
 
 ## Customization
 
@@ -103,6 +126,21 @@ Change `refreshFrequency` in `casaos.jsx` (milliseconds):
 export const refreshFrequency = 6000; // 6 seconds
 ```
 
+### Add More Languages
+
+Edit the `i18n` object in `casaos.jsx`:
+
+```javascript
+const i18n = {
+  en: { ... },
+  uk: { ... },
+  de: {
+    systemStatus: 'Systemstatus',
+    // ... add translations
+  }
+};
+```
+
 ## Troubleshooting
 
 ### Widget shows "Server unavailable"
@@ -121,6 +159,13 @@ export const refreshFrequency = 6000; // 6 seconds
 The server might need `sysstat` package installed:
 ```bash
 sudo apt install sysstat
+```
+
+### Disks not showing temperature
+
+Install smartmontools on your server:
+```bash
+sudo apt install smartmontools
 ```
 
 ## License
