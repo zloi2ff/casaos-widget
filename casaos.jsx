@@ -3,23 +3,57 @@
 
 export const refreshFrequency = 6000; // 6 seconds
 
-// Get widget directory path dynamically
-const widgetPath = `/Users/Andrii/Library/Application\\ Support/Übersicht/widgets/casaos.widget`;
-export const command = `${widgetPath}/fetch-stats.sh`;
+// Path to scripts
+export const command = `/Users/Andrii/Library/Application\\ Support/Übersicht/widgets/fetch-stats.sh`;
+const actionScript = `/Users/Andrii/Library/Application\\ Support/Übersicht/widgets/docker-action.sh`;
+
+const dockerAction = (action, container) => {
+  window.run(`${actionScript} ${action} ${container}`);
+};
+
+// Theme definitions
+const themes = {
+  dark: {
+    bg: 'linear-gradient(145deg, rgba(12, 12, 28, 0.96), rgba(20, 20, 45, 0.96))',
+    text: '#fff',
+    textMuted: 'rgba(255,255,255,0.5)',
+    border: 'rgba(255,255,255,0.06)',
+    cardBg: 'rgba(255,255,255,0.025)',
+    sectionBg: 'rgba(0,0,0,0.25)',
+    btnBg: 'rgba(255,255,255,0.05)',
+    btnHover: 'rgba(255,255,255,0.15)',
+    shadow: 'rgba(0,0,0,0.6)'
+  },
+  light: {
+    bg: 'linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(245, 245, 250, 0.96))',
+    text: '#1a1a2e',
+    textMuted: 'rgba(26,26,46,0.5)',
+    border: 'rgba(0,0,0,0.08)',
+    cardBg: 'rgba(0,0,0,0.03)',
+    sectionBg: 'rgba(0,0,0,0.05)',
+    btnBg: 'rgba(0,0,0,0.05)',
+    btnHover: 'rgba(0,0,0,0.1)',
+    shadow: 'rgba(0,0,0,0.15)'
+  }
+};
+
+// Detect system theme
+const getSystemTheme = () => {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return 'dark';
+};
 
 export const className = `
   top: 20px;
   left: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  color: #fff;
 
   .widget {
-    background: linear-gradient(145deg, rgba(12, 12, 28, 0.96), rgba(20, 20, 45, 0.96));
     border-radius: 20px;
     width: 300px;
     backdrop-filter: blur(30px);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.06);
     overflow: hidden;
   }
 
@@ -100,10 +134,10 @@ export const className = `
 
   .app-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 9px 0;
     border-bottom: 1px solid rgba(255,255,255,0.03);
+    gap: 8px;
   }
 
   .app-item:last-child { border-bottom: none; }
@@ -113,15 +147,24 @@ export const className = `
     align-items: center;
     gap: 10px;
     font-size: 13px;
+    flex: 1;
+    min-width: 0;
   }
 
-  .app-icon { font-size: 15px; width: 20px; text-align: center; }
+  .app-name span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
 
   .app-stat {
     font-size: 12px;
     font-weight: 500;
-    min-width: 80px;
+    width: 70px;
     text-align: right;
+    flex-shrink: 0;
   }
 
   .app-stat.cpu { color: #22d3ee; }
@@ -188,14 +231,74 @@ export const className = `
     color: #ff6b6b;
     font-size: 12px;
   }
+
+  .tailscale-section {
+    padding: 12px 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ts-icon {
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+  }
+
+  .ts-info { flex: 1; }
+  .ts-title { font-size: 12px; font-weight: 500; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+  .ts-detail { font-size: 11px; opacity: 0.5; }
+
+  .ts-status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .ts-status.online { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+  .ts-status.offline { background: #ff6b6b; box-shadow: 0 0 6px #ff6b6b; }
+
+  .action-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: opacity 0.2s, background 0.2s;
+    flex-shrink: 0;
+    color: inherit;
+  }
+
+  .app-item:hover .action-btn { opacity: 0.9; }
+  .action-btn:hover { opacity: 1; background: rgba(34, 211, 238, 0.3); }
 `;
 
-export const initialState = { activeTab: 'ram', output: '', collapsed: false };
+// Theme modes: 'auto', 'dark', 'light'
+export const initialState = { activeTab: 'ram', output: '', collapsed: false, themeMode: 'auto', appsCollapsed: false };
 
 export const updateState = (event, prev) => {
   if (event.type === 'UB/COMMAND_RAN') return { ...prev, output: event.output };
   if (event.type === 'TAB_CLICK') return { ...prev, activeTab: event.tab };
   if (event.type === 'TOGGLE_COLLAPSE') return { ...prev, collapsed: !prev.collapsed };
+  if (event.type === 'TOGGLE_APPS') return { ...prev, appsCollapsed: !prev.appsCollapsed };
+  if (event.type === 'CYCLE_THEME') {
+    const modes = ['auto', 'dark', 'light'];
+    const idx = modes.indexOf(prev.themeMode);
+    return { ...prev, themeMode: modes[(idx + 1) % 3] };
+  }
   return prev;
 };
 
@@ -237,86 +340,14 @@ const i18n = {
     used: 'Використано',
     total: 'Усього'
   },
-  de: {
-    systemStatus: 'Systemstatus',
-    serverUnavailable: 'Server nicht erreichbar',
-    loading: 'Laden...',
-    storage: 'Speicher',
-    systemDisk: 'Systemfestplatte',
-    used: 'Belegt',
-    total: 'Gesamt'
-  },
-  fr: {
-    systemStatus: 'État du système',
-    serverUnavailable: 'Serveur indisponible',
-    loading: 'Chargement...',
-    storage: 'Stockage',
-    systemDisk: 'Disque système',
-    used: 'Utilisé',
-    total: 'Total'
-  },
-  es: {
-    systemStatus: 'Estado del sistema',
-    serverUnavailable: 'Servidor no disponible',
-    loading: 'Cargando...',
-    storage: 'Almacenamiento',
-    systemDisk: 'Disco del sistema',
-    used: 'Usado',
-    total: 'Total'
-  },
-  it: {
-    systemStatus: 'Stato del sistema',
-    serverUnavailable: 'Server non disponibile',
-    loading: 'Caricamento...',
-    storage: 'Archiviazione',
-    systemDisk: 'Disco di sistema',
-    used: 'Usato',
-    total: 'Totale'
-  },
-  pl: {
-    systemStatus: 'Stan systemu',
-    serverUnavailable: 'Serwer niedostępny',
-    loading: 'Ładowanie...',
-    storage: 'Pamięć',
-    systemDisk: 'Dysk systemowy',
-    used: 'Użyte',
-    total: 'Razem'
-  },
-  pt: {
-    systemStatus: 'Estado do sistema',
-    serverUnavailable: 'Servidor indisponível',
-    loading: 'Carregando...',
-    storage: 'Armazenamento',
-    systemDisk: 'Disco do sistema',
-    used: 'Usado',
-    total: 'Total'
-  },
-  nl: {
-    systemStatus: 'Systeemstatus',
-    serverUnavailable: 'Server niet bereikbaar',
-    loading: 'Laden...',
-    storage: 'Opslag',
-    systemDisk: 'Systeemschijf',
-    used: 'Gebruikt',
-    total: 'Totaal'
-  },
-  zh: {
-    systemStatus: '系统状态',
-    serverUnavailable: '服务器不可用',
-    loading: '加载中...',
-    storage: '存储',
-    systemDisk: '系统磁盘',
-    used: '已用',
-    total: '总共'
-  },
-  ja: {
-    systemStatus: 'システム状態',
-    serverUnavailable: 'サーバー利用不可',
-    loading: '読み込み中...',
-    storage: 'ストレージ',
-    systemDisk: 'システムディスク',
-    used: '使用中',
-    total: '合計'
+  ru: {
+    systemStatus: 'Состояние системы',
+    serverUnavailable: 'Сервер недоступен',
+    loading: 'Загрузка...',
+    storage: 'Хранилище',
+    systemDisk: 'Системный диск',
+    used: 'Использовано',
+    total: 'Всего'
   }
 };
 const t = i18n[lang] || i18n.en;
@@ -326,7 +357,8 @@ const parse = (out) => {
     cpu: 0, ram: 0, ramUsed: '0', ramTotal: '0',
     temp: 0, power: '--',
     disks: [],
-    containers: [], error: null
+    containers: [], error: null,
+    tailscale: { online: false, ip: '--', hostname: '--' }
   };
   if (!out) return d;
 
@@ -359,6 +391,16 @@ const parse = (out) => {
         });
       }
     }
+    else if (line.startsWith('TAILSCALE:')) {
+      const p = line.split(':');
+      if (p.length >= 4) {
+        d.tailscale = {
+          online: p[1] === 'true',
+          ip: p[2] || '--',
+          hostname: p[3] || '--'
+        };
+      }
+    }
     else if (line.startsWith('CONTAINER:')) {
       const p = line.split(':');
       if (p.length >= 4) {
@@ -379,15 +421,17 @@ const parse = (out) => {
   return d;
 };
 
-const Circle = ({ pct, color, label, sub }) => {
+const Circle = ({ pct, color, label, sub, theme }) => {
   const r = 34, c = 2 * Math.PI * r, o = c - (Math.min(pct,100)/100) * c;
+  const isLight = theme === 'light';
+  const bgStroke = isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.08)';
   return (
     <div className="circle-item">
       <div className="circle-wrapper">
         <svg width="85" height="85">
-          <circle cx="42.5" cy="42.5" r={r} className="circle-bg" />
+          <circle cx="42.5" cy="42.5" r={r} className="circle-bg" style={{stroke: bgStroke, strokeWidth: isLight ? 7 : 6}} />
           <circle cx="42.5" cy="42.5" r={r} className="circle-progress"
-            style={{ stroke: color, strokeDasharray: c, strokeDashoffset: o }} />
+            style={{ stroke: color, strokeDasharray: c, strokeDashoffset: o, strokeWidth: isLight ? 7 : 6 }} />
         </svg>
         <div className="circle-text">
           <div className="circle-percent">{Math.round(pct)}%</div>
@@ -403,15 +447,27 @@ const cpuCol = (p) => p > 80 ? '#ff6b6b' : p > 50 ? '#fbbf24' : '#22d3ee';
 const ramCol = (p) => p > 80 ? '#ff6b6b' : p > 60 ? '#fbbf24' : '#4ade80';
 const diskCol = (p) => p > 85 ? '#ff6b6b' : p > 70 ? '#fbbf24' : '#4ade80';
 
-export const render = ({ output, activeTab, collapsed }, dispatch) => {
+export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed }, dispatch) => {
+  // Resolve theme
+  const currentTheme = themeMode === 'auto' ? getSystemTheme() : themeMode;
+  const th = themes[currentTheme];
+  const themeIcon = themeMode === 'auto' ? '◐' : themeMode === 'dark' ? '🌙' : '☀️';
+
+  const widgetStyle = {
+    background: th.bg,
+    color: th.text,
+    boxShadow: `0 20px 60px ${th.shadow}`,
+    border: `1px solid ${th.border}`
+  };
+
   if (!output || !output.trim()) {
-    return <div className="widget"><div className="offline">🔌 {t.serverUnavailable}</div></div>;
+    return <div className="widget" style={widgetStyle}><div className="offline">🔌 {t.serverUnavailable}</div></div>;
   }
 
   const d = parse(output);
 
   if (d.error) {
-    return <div className="widget"><div className="error">⚠️ {d.error}</div></div>;
+    return <div className="widget" style={widgetStyle}><div className="error">⚠️ {d.error}</div></div>;
   }
 
   const isCpu = activeTab === 'cpu';
@@ -419,42 +475,61 @@ export const render = ({ output, activeTab, collapsed }, dispatch) => {
 
   if (collapsed) {
     return (
-      <div className="widget">
-        <div className="header" style={{borderBottom:'none'}}>
+      <div className="widget" style={widgetStyle}>
+        <div className="header" style={{borderBottom:'none', borderColor: th.border}}>
           <span>{t.systemStatus}</span>
-          <span
-            style={{opacity:0.6,fontSize:12,cursor:'pointer',padding:'4px'}}
-            onClick={() => dispatch({type:'TOGGLE_COLLAPSE'})}>▶</span>
+          <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+            <span style={{opacity:0.6,fontSize:12,cursor:'pointer',padding:'4px'}}
+              onClick={() => dispatch({type:'CYCLE_THEME'})}>{themeIcon}</span>
+            <span style={{opacity:0.6,fontSize:12,cursor:'pointer',padding:'4px'}}
+              onClick={() => dispatch({type:'TOGGLE_COLLAPSE'})}>▶</span>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="widget">
-      <div className="header">
+    <div className="widget" style={widgetStyle}>
+      <div className="header" style={{borderColor: th.border}}>
         <span>{t.systemStatus}</span>
-        <span
-          style={{opacity:0.4,fontSize:12,cursor:'pointer',padding:'4px'}}
-          onClick={() => dispatch({type:'TOGGLE_COLLAPSE'})}>▼</span>
+        <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+          <span style={{opacity:0.5,fontSize:12,cursor:'pointer',padding:'4px'}}
+            onClick={() => dispatch({type:'CYCLE_THEME'})} title={`Theme: ${themeMode}`}>{themeIcon}</span>
+          <span style={{opacity:0.4,fontSize:12,cursor:'pointer',padding:'4px'}}
+            onClick={() => dispatch({type:'TOGGLE_COLLAPSE'})}>▼</span>
+        </div>
       </div>
 
       <div className="section">
         <div className="circles">
-          <Circle pct={d.cpu} color={cpuCol(d.cpu)} label="CPU" sub={cpuSub} />
-          <Circle pct={d.ram} color={ramCol(d.ram)} label="RAM" sub={`${d.ramUsed} GB`} />
+          <Circle pct={d.cpu} color={cpuCol(d.cpu)} label="CPU" sub={cpuSub} theme={currentTheme} />
+          <Circle pct={d.ram} color={ramCol(d.ram)} label="RAM" sub={`${d.ramUsed} GB`} theme={currentTheme} />
         </div>
       </div>
 
-      <div className="apps-section">
-        <div className="tabs">
-          <span className={`tab ${isCpu ? 'active cpu-active' : ''}`}
-            onClick={() => dispatch({type:'TAB_CLICK',tab:'cpu'})}>CPU</span>
-          <span className={`tab ${!isCpu ? 'active' : ''}`}
-            onClick={() => dispatch({type:'TAB_CLICK',tab:'ram'})}>RAM</span>
+      <div className="tailscale-section" style={{borderColor: th.border}}>
+        <div className="ts-icon" style={{background: th.btnBg}}>🔗</div>
+        <div className="ts-info">
+          <div className="ts-title">
+            <span className={`ts-status ${d.tailscale.online ? 'online' : 'offline'}`}></span>
+            Tailscale
+          </div>
+          <div className="ts-detail" style={{color: th.textMuted}}>{d.tailscale.ip} • {d.tailscale.hostname}</div>
         </div>
-        {d.containers.length > 0 ? d.containers.map((c, i) => (
-          <div key={i} className="app-item">
+      </div>
+
+      <div className="apps-section" style={{borderColor: th.border, padding: appsCollapsed ? '10px 20px' : '15px 20px'}}>
+        <div className="tabs" style={{marginBottom: appsCollapsed ? 0 : 12, justifyContent: appsCollapsed ? 'center' : 'flex-start'}}>
+          {!appsCollapsed && <span className={`tab ${isCpu ? 'active cpu-active' : ''}`}
+              onClick={() => dispatch({type:'TAB_CLICK',tab:'cpu'})}>CPU</span>}
+          {!appsCollapsed && <span className={`tab ${!isCpu ? 'active' : ''}`}
+              onClick={() => dispatch({type:'TAB_CLICK',tab:'ram'})}>RAM</span>}
+          <span style={{marginLeft: appsCollapsed ? 0 : 'auto', opacity:0.4, cursor:'pointer', fontSize: appsCollapsed ? 12 : 10}}
+            onClick={() => dispatch({type:'TOGGLE_APPS'})}>{appsCollapsed ? '▶ Apps' : '▼'}</span>
+        </div>
+        {!appsCollapsed && (d.containers.length > 0 ? d.containers.map((c, i) => (
+          <div key={i} className="app-item" style={{borderColor: th.border}}>
             <div className="app-name">
               <span className="app-icon">{getIcon(c.name)}</span>
               <span>{fmtName(c.name)}</span>
@@ -462,28 +537,29 @@ export const render = ({ output, activeTab, collapsed }, dispatch) => {
             <span className={`app-stat ${isCpu ? 'cpu' : 'ram'}`}>
               {isCpu ? c.cpu : c.mem}
             </span>
+            <button className="action-btn restart" title="Restart" onClick={() => dockerAction('restart', c.name)}>↻</button>
           </div>
-        )) : <div style={{opacity:0.4,fontSize:12,padding:'10px 0',textAlign:'center'}}>{t.loading}</div>}
+        )) : <div style={{opacity:0.4,fontSize:12,padding:'10px 0',textAlign:'center'}}>{t.loading}</div>)}
       </div>
 
-      <div className="storage-section">
+      <div className="storage-section" style={{background: th.sectionBg}}>
         <div className="section-title">
           <span>{t.storage}</span>
           <span style={{opacity:0.4}}>⚙️</span>
         </div>
         {d.disks.map((disk, i) => (
-          <div key={i} className="disk-item">
+          <div key={i} className="disk-item" style={{background: th.cardBg}}>
             <div className="disk-header">
               <span className="disk-icon">{disk.isSystem ? '💾' : '💿'}</span>
               <div className="disk-info">
-                <div className="disk-name">
+                <div className="disk-name" style={{color: th.text}}>
                   {disk.isSystem ? t.systemDisk : disk.name}
-                  {disk.temp !== '--' && <span style={{opacity:0.5,fontSize:11,marginLeft:6}}>{disk.temp}°C</span>}
+                  {disk.temp !== '--' && <span style={{opacity:0.7,fontSize:11,marginLeft:6}}>{disk.temp}°C</span>}
                 </div>
-                <div className="disk-usage">{t.used}: {fmtBytes(disk.used)} / {t.total}: {fmtBytes(disk.total)}</div>
+                <div className="disk-usage" style={{color: th.text, opacity: 0.7}}>{t.used}: {fmtBytes(disk.used)} / {t.total}: {fmtBytes(disk.total)}</div>
               </div>
             </div>
-            <div className="progress-bar">
+            <div className="progress-bar" style={{background: th.btnBg}}>
               <div className="progress-fill" style={{width:`${disk.percent}%`,backgroundColor:diskCol(disk.percent)}} />
             </div>
           </div>

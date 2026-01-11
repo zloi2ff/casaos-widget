@@ -10,9 +10,12 @@ A beautiful macOS desktop widget that displays real-time system statistics from 
 - **RAM Usage** - Memory usage matching CasaOS calculations
 - **Docker Containers** - Dynamic list of running containers with CPU/RAM usage
 - **Storage** - Auto-detected disks with usage and temperature
-- **Collapsible** - Click arrow to collapse/expand widget
-- **Localization** - Auto-detects system language (10 languages supported)
-- **Live Updates** - Refreshes every 6 seconds, containers appear/disappear automatically
+- **Tailscale Status** - Shows connection status, IP and hostname
+- **Quick Actions** - Restart containers with one click
+- **Themes** - Light, Dark, and Auto (follows macOS system theme)
+- **Collapsible** - Click arrow to collapse/expand widget and apps section
+- **Localization** - Auto-detects system language (English, Ukrainian, Russian)
+- **Live Updates** - Refreshes every 6 seconds
 
 ## Requirements
 
@@ -97,23 +100,33 @@ The widget automatically detects all mounted disks on your server and displays:
 - Containers appear when started, disappear when stopped
 - Switch between CPU and RAM view with tabs
 - Sorted by memory usage
+- Collapsible apps section (click ▼ near tabs)
+
+### Quick Actions
+- Hover over a container to see the restart button
+- Click ↻ to restart a container remotely
+
+### Tailscale Status
+- Shows online/offline status with indicator
+- Displays Tailscale IP address
+- Shows hostname
+- Works with both native Tailscale and Docker container
+
+### Themes
+Click the theme icon in the header to cycle through:
+- **◐ Auto** - Follows macOS system appearance
+- **🌙 Dark** - Dark theme
+- **☀️ Light** - Light theme
 
 ### Collapsible Widget
-Click the arrow (▼/▶) in the header to collapse or expand the widget.
+- Click ▼ in the header to collapse the entire widget
+- Click ▼ near CPU/RAM tabs to collapse just the apps section
 
 ### Localization
-The widget automatically detects your macOS system language and displays text in:
+The widget automatically detects your macOS system language:
 - English (en) - default
 - Ukrainian (uk)
-- German (de)
-- French (fr)
-- Spanish (es)
-- Italian (it)
-- Polish (pl)
-- Portuguese (pt)
-- Dutch (nl)
-- Chinese (zh)
-- Japanese (ja)
+- Russian (ru)
 
 ## Customization
 
