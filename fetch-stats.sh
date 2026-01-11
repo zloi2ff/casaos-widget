@@ -26,7 +26,7 @@ fi
 ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -o BatchMode=yes ${SERVER_USER}@${SERVER_HOST} "
 # CPU - use mpstat if available, fallback to /proc/stat
 if command -v mpstat &>/dev/null; then
-  cpu_usage=\$(LC_NUMERIC=C mpstat 1 1 | awk '/^Average:/ {gsub(\",\", \".\"); v=100-\$NF; if(v>0 && v<1) v=1; printf \"%.0f\", v}')
+  cpu_usage=\$(LC_NUMERIC=C mpstat 1 1 | awk '/^Average:/ {gsub(\",\", \".\"); v=100-\$NF; if(v<1) v=1; printf \"%.0f\", v}')
 else
   cpu1=\$(head -1 /proc/stat)
   sleep 1
