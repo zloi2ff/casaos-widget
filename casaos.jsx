@@ -236,6 +236,87 @@ const i18n = {
     systemDisk: 'Системний диск',
     used: 'Використано',
     total: 'Усього'
+  },
+  de: {
+    systemStatus: 'Systemstatus',
+    serverUnavailable: 'Server nicht erreichbar',
+    loading: 'Laden...',
+    storage: 'Speicher',
+    systemDisk: 'Systemfestplatte',
+    used: 'Belegt',
+    total: 'Gesamt'
+  },
+  fr: {
+    systemStatus: 'État du système',
+    serverUnavailable: 'Serveur indisponible',
+    loading: 'Chargement...',
+    storage: 'Stockage',
+    systemDisk: 'Disque système',
+    used: 'Utilisé',
+    total: 'Total'
+  },
+  es: {
+    systemStatus: 'Estado del sistema',
+    serverUnavailable: 'Servidor no disponible',
+    loading: 'Cargando...',
+    storage: 'Almacenamiento',
+    systemDisk: 'Disco del sistema',
+    used: 'Usado',
+    total: 'Total'
+  },
+  it: {
+    systemStatus: 'Stato del sistema',
+    serverUnavailable: 'Server non disponibile',
+    loading: 'Caricamento...',
+    storage: 'Archiviazione',
+    systemDisk: 'Disco di sistema',
+    used: 'Usato',
+    total: 'Totale'
+  },
+  pl: {
+    systemStatus: 'Stan systemu',
+    serverUnavailable: 'Serwer niedostępny',
+    loading: 'Ładowanie...',
+    storage: 'Pamięć',
+    systemDisk: 'Dysk systemowy',
+    used: 'Użyte',
+    total: 'Razem'
+  },
+  pt: {
+    systemStatus: 'Estado do sistema',
+    serverUnavailable: 'Servidor indisponível',
+    loading: 'Carregando...',
+    storage: 'Armazenamento',
+    systemDisk: 'Disco do sistema',
+    used: 'Usado',
+    total: 'Total'
+  },
+  nl: {
+    systemStatus: 'Systeemstatus',
+    serverUnavailable: 'Server niet bereikbaar',
+    loading: 'Laden...',
+    storage: 'Opslag',
+    systemDisk: 'Systeemschijf',
+    used: 'Gebruikt',
+    total: 'Totaal'
+  },
+  zh: {
+    systemStatus: '系统状态',
+    serverUnavailable: '服务器不可用',
+    loading: '加载中...',
+    storage: '存储',
+    systemDisk: '系统磁盘',
+    used: '已用',
+    total: '总共'
+  },
+  ja: {
+    systemStatus: 'システム状態',
+    serverUnavailable: 'サーバー利用不可',
+    loading: '読み込み中...',
+    storage: 'ストレージ',
+    systemDisk: 'システムディスク',
+    used: '使用中',
+    total: '合計'
   }
 };
 const t = i18n[lang] || i18n.en;

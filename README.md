@@ -11,7 +11,7 @@ A beautiful macOS desktop widget that displays real-time system statistics from 
 - **Docker Containers** - Dynamic list of running containers with CPU/RAM usage
 - **Storage** - Auto-detected disks with usage and temperature
 - **Collapsible** - Click arrow to collapse/expand widget
-- **Localization** - Auto-detects system language (English, Ukrainian)
+- **Localization** - Auto-detects system language (10 languages supported)
 - **Live Updates** - Refreshes every 6 seconds, containers appear/disappear automatically
 
 ## Requirements
@@ -103,8 +103,17 @@ Click the arrow (▼/▶) in the header to collapse or expand the widget.
 
 ### Localization
 The widget automatically detects your macOS system language and displays text in:
-- English (default)
+- English (en) - default
 - Ukrainian (uk)
+- German (de)
+- French (fr)
+- Spanish (es)
+- Italian (it)
+- Polish (pl)
+- Portuguese (pt)
+- Dutch (nl)
+- Chinese (zh)
+- Japanese (ja)
 
 ## Customization
 
