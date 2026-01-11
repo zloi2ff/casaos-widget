@@ -3,13 +3,12 @@
 
 export const refreshFrequency = 6000; // 6 seconds
 
-// Path to scripts
+// Configuration - UPDATE THESE PATHS AND IP FOR YOUR SETUP
+const SERVER_IP = '192.168.31.73'; // Your CasaOS server IP
 export const command = `/Users/Andrii/Library/Application\\ Support/Übersicht/widgets/fetch-stats.sh`;
 const actionScript = `/Users/Andrii/Library/Application\\ Support/Übersicht/widgets/docker-action.sh`;
+const openScript = `/tmp/open-app.sh`;
 
-const dockerAction = (action, container) => {
-  window.run(`${actionScript} ${action} ${container}`);
-};
 
 // Theme definitions
 const themes = {
@@ -309,11 +308,30 @@ const icons = {
   nextcloud: '☁️', pihole: '🛡️', grafana: '📊', prometheus: '📈'
 };
 
+// App ports - customize for your setup
+const appPorts = {
+  jellyfin: 8097, qbittorrent: 8181, adguard: 8080, 'adguard-home': 8080,
+  plex: 32400, portainer: 9000, homeassistant: 8123, 'home-assistant': 8123,
+  sonarr: 8989, radarr: 7878, prowlarr: 9696, transmission: 9091,
+  nextcloud: 443, pihole: 80, grafana: 3000, prometheus: 9090,
+  nginx: 80, traefik: 8080, syncthing: 8384, vaultwarden: 80,
+  filebrowser: 8080, duplicati: 8200, gitea: 3000, code: 8443
+};
+
 const getIcon = (n) => {
   const l = (n || '').toLowerCase();
   for (const [k, v] of Object.entries(icons)) if (l.includes(k)) return v;
   return '📦';
 };
+
+const getAppUrl = (name, serverIp) => {
+  const l = (name || '').toLowerCase();
+  for (const [k, port] of Object.entries(appPorts)) {
+    if (l.includes(k)) return `http://${serverIp}:${port}`;
+  }
+  return null;
+};
+
 
 const fmtName = (n) => n.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
 // Use decimal (SI) units like CasaOS: 1 GB = 1000^3 bytes
@@ -569,7 +587,8 @@ const parse = (out) => {
         d.containers.push({
           name: p[1],
           cpu: p[2],
-          mem: p[3].split('/')[0].trim()
+          mem: p[3].split('/')[0].trim(),
+          port: p[4] && p[4] !== '--' ? p[4] : null
         });
       }
     }
@@ -693,13 +712,19 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed 
         {!appsCollapsed && (d.containers.length > 0 ? d.containers.map((c, i) => (
           <div key={i} className="app-item" style={{borderColor: th.border}}>
             <div className="app-name">
-              <span className="app-icon">{getIcon(c.name)}</span>
+              {c.port ? (
+                <a href={`http://${SERVER_IP}:${c.port}`}
+                   className="app-icon"
+                   style={{textDecoration:'none', cursor:'pointer'}}
+                   title={`Open :${c.port}`}>{getIcon(c.name)}</a>
+              ) : (
+                <span className="app-icon">{getIcon(c.name)}</span>
+              )}
               <span>{fmtName(c.name)}</span>
             </div>
             <span className={`app-stat ${isCpu ? 'cpu' : 'ram'}`}>
               {isCpu ? c.cpu : c.mem}
             </span>
-            <button className="action-btn restart" title="Restart" onClick={() => dockerAction('restart', c.name)}>↻</button>
           </div>
         )) : <div style={{opacity:0.4,fontSize:12,padding:'10px 0',textAlign:'center'}}>{t.loading}</div>)}
       </div>

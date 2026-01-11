@@ -112,6 +112,34 @@ else
   echo "TAILSCALE:false:--:--"
 fi
 
-# Docker stats
-echo "saberuu3aa" | sudo -S docker stats --no-stream --format "CONTAINER:{{.Name}}:{{.CPUPerc}}:{{.MemUsage}}" 2>/dev/null
+# Docker stats with ports
+for container in $(echo "saberuu3aa" | sudo -S docker ps --format "{{.Names}}" 2>/dev/null); do
+  stats=$(echo "saberuu3aa" | sudo -S docker stats --no-stream --format "{{.CPUPerc}}:{{.MemUsage}}" "$container" 2>/dev/null)
+  # Get web port - prioritize common web UI ports
+  all_ports=$(echo "saberuu3aa" | sudo -S docker port "$container" 2>/dev/null | grep -oE "[0-9]+$" | sort -u)
+  port="--"
+  # First pass: look for 8080 specifically (common web UI)
+  for p in $all_ports; do
+    if [ "$p" = "8080" ]; then port=$p; break; fi
+  done
+  # Second pass: 8xxx ports
+  if [ "$port" = "--" ]; then
+    for p in $all_ports; do
+      if [ "$p" -ge 8000 ] && [ "$p" -le 9999 ]; then port=$p; break; fi
+    done
+  fi
+  # Third pass: 3xxx ports
+  if [ "$port" = "--" ]; then
+    for p in $all_ports; do
+      if [ "$p" -ge 3000 ] && [ "$p" -le 3999 ]; then port=$p; break; fi
+    done
+  fi
+  # Fourth pass: 80 or 443
+  if [ "$port" = "--" ]; then
+    for p in $all_ports; do
+      if [ "$p" = "80" ] || [ "$p" = "443" ]; then port=$p; break; fi
+    done
+  fi
+  echo "CONTAINER:$container:$stats:$port"
+done
 ' 2>/dev/null
