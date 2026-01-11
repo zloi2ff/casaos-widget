@@ -2,7 +2,9 @@
 
 A beautiful macOS desktop widget that displays real-time system statistics from your CasaOS server.
 
-![Widget Screenshot](screenshot.png)
+| Dark Theme | Light Theme |
+|:---:|:---:|
+| ![Dark](screenshot.png) | ![Light](screenshot-light.png) |
 
 ## Features
 
