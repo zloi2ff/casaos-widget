@@ -14,7 +14,7 @@ A beautiful macOS desktop widget that displays real-time system statistics from 
 - **Quick Actions** - Restart containers with one click
 - **Themes** - Light, Dark, and Auto (follows macOS system theme)
 - **Collapsible** - Click arrow to collapse/expand widget and apps section
-- **Localization** - Auto-detects system language (English, Ukrainian, Russian)
+- **Localization** - Auto-detects system language (20 languages supported)
 - **Live Updates** - Refreshes every 6 seconds
 
 ## Requirements
@@ -126,7 +126,24 @@ Click the theme icon in the header to cycle through:
 The widget automatically detects your macOS system language:
 - English (en) - default
 - Ukrainian (uk)
-- Russian (ru)
+- German (de)
+- French (fr)
+- Spanish (es)
+- Italian (it)
+- Polish (pl)
+- Portuguese (pt)
+- Dutch (nl)
+- Chinese (zh)
+- Japanese (ja)
+- Korean (ko)
+- Turkish (tr)
+- Hindi (hi)
+- Arabic (ar)
+- Indonesian (id)
+- Vietnamese (vi)
+- Thai (th)
+- Swedish (sv)
+- Czech (cs)
 
 ## Customization
 

@@ -340,6 +340,168 @@ const i18n = {
     used: 'Використано',
     total: 'Усього'
   },
+  de: {
+    systemStatus: 'Systemstatus',
+    serverUnavailable: 'Server nicht erreichbar',
+    loading: 'Laden...',
+    storage: 'Speicher',
+    systemDisk: 'Systemfestplatte',
+    used: 'Belegt',
+    total: 'Gesamt'
+  },
+  fr: {
+    systemStatus: 'État du système',
+    serverUnavailable: 'Serveur indisponible',
+    loading: 'Chargement...',
+    storage: 'Stockage',
+    systemDisk: 'Disque système',
+    used: 'Utilisé',
+    total: 'Total'
+  },
+  es: {
+    systemStatus: 'Estado del sistema',
+    serverUnavailable: 'Servidor no disponible',
+    loading: 'Cargando...',
+    storage: 'Almacenamiento',
+    systemDisk: 'Disco del sistema',
+    used: 'Usado',
+    total: 'Total'
+  },
+  it: {
+    systemStatus: 'Stato del sistema',
+    serverUnavailable: 'Server non disponibile',
+    loading: 'Caricamento...',
+    storage: 'Archiviazione',
+    systemDisk: 'Disco di sistema',
+    used: 'Usato',
+    total: 'Totale'
+  },
+  pl: {
+    systemStatus: 'Stan systemu',
+    serverUnavailable: 'Serwer niedostępny',
+    loading: 'Ładowanie...',
+    storage: 'Pamięć',
+    systemDisk: 'Dysk systemowy',
+    used: 'Użyte',
+    total: 'Razem'
+  },
+  pt: {
+    systemStatus: 'Estado do sistema',
+    serverUnavailable: 'Servidor indisponível',
+    loading: 'Carregando...',
+    storage: 'Armazenamento',
+    systemDisk: 'Disco do sistema',
+    used: 'Usado',
+    total: 'Total'
+  },
+  nl: {
+    systemStatus: 'Systeemstatus',
+    serverUnavailable: 'Server niet beschikbaar',
+    loading: 'Laden...',
+    storage: 'Opslag',
+    systemDisk: 'Systeemschijf',
+    used: 'Gebruikt',
+    total: 'Totaal'
+  },
+  zh: {
+    systemStatus: '系统状态',
+    serverUnavailable: '服务器不可用',
+    loading: '加载中...',
+    storage: '存储',
+    systemDisk: '系统磁盘',
+    used: '已用',
+    total: '总计'
+  },
+  ja: {
+    systemStatus: 'システム状態',
+    serverUnavailable: 'サーバー利用不可',
+    loading: '読み込み中...',
+    storage: 'ストレージ',
+    systemDisk: 'システムディスク',
+    used: '使用済み',
+    total: '合計'
+  },
+  ko: {
+    systemStatus: '시스템 상태',
+    serverUnavailable: '서버 사용 불가',
+    loading: '로딩 중...',
+    storage: '저장소',
+    systemDisk: '시스템 디스크',
+    used: '사용됨',
+    total: '전체'
+  },
+  tr: {
+    systemStatus: 'Sistem Durumu',
+    serverUnavailable: 'Sunucu kullanılamıyor',
+    loading: 'Yükleniyor...',
+    storage: 'Depolama',
+    systemDisk: 'Sistem Diski',
+    used: 'Kullanılan',
+    total: 'Toplam'
+  },
+  hi: {
+    systemStatus: 'सिस्टम स्थिति',
+    serverUnavailable: 'सर्वर उपलब्ध नहीं',
+    loading: 'लोड हो रहा है...',
+    storage: 'भंडारण',
+    systemDisk: 'सिस्टम डिस्क',
+    used: 'उपयोग किया गया',
+    total: 'कुल'
+  },
+  ar: {
+    systemStatus: 'حالة النظام',
+    serverUnavailable: 'الخادم غير متاح',
+    loading: 'جار التحميل...',
+    storage: 'التخزين',
+    systemDisk: 'قرص النظام',
+    used: 'مستخدم',
+    total: 'الإجمالي'
+  },
+  id: {
+    systemStatus: 'Status Sistem',
+    serverUnavailable: 'Server tidak tersedia',
+    loading: 'Memuat...',
+    storage: 'Penyimpanan',
+    systemDisk: 'Disk Sistem',
+    used: 'Terpakai',
+    total: 'Total'
+  },
+  vi: {
+    systemStatus: 'Trạng thái hệ thống',
+    serverUnavailable: 'Máy chủ không khả dụng',
+    loading: 'Đang tải...',
+    storage: 'Lưu trữ',
+    systemDisk: 'Đĩa hệ thống',
+    used: 'Đã dùng',
+    total: 'Tổng'
+  },
+  th: {
+    systemStatus: 'สถานะระบบ',
+    serverUnavailable: 'เซิร์ฟเวอร์ไม่พร้อมใช้งาน',
+    loading: 'กำลังโหลด...',
+    storage: 'ที่เก็บข้อมูล',
+    systemDisk: 'ดิสก์ระบบ',
+    used: 'ใช้แล้ว',
+    total: 'ทั้งหมด'
+  },
+  sv: {
+    systemStatus: 'Systemstatus',
+    serverUnavailable: 'Server otillgänglig',
+    loading: 'Laddar...',
+    storage: 'Lagring',
+    systemDisk: 'Systemdisk',
+    used: 'Använt',
+    total: 'Totalt'
+  },
+  cs: {
+    systemStatus: 'Stav systému',
+    serverUnavailable: 'Server nedostupný',
+    loading: 'Načítání...',
+    storage: 'Úložiště',
+    systemDisk: 'Systémový disk',
+    used: 'Použito',
+    total: 'Celkem'
+  },
   ru: {
     systemStatus: 'Состояние системы',
     serverUnavailable: 'Сервер недоступен',
