@@ -216,11 +216,44 @@ const fmtName = (n) => n.split('-').map(w => w[0].toUpperCase() + w.slice(1)).jo
 // Use decimal (SI) units like CasaOS: 1 GB = 1000^3 bytes
 const fmtBytes = (b) => b >= 1000000000 ? `${(b/1000000000).toFixed(2)} GB` : `${Math.round(b/1000000)} MB`;
 
+// Localization
+const lang = (typeof window !== 'undefined' && navigator.language || 'en').slice(0, 2);
+const i18n = {
+  en: {
+    systemStatus: 'System Status',
+    serverUnavailable: 'Server unavailable',
+    loading: 'Loading...',
+    storage: 'Storage',
+    systemDisk: 'System Disk',
+    used: 'Used',
+    total: 'Total'
+  },
+  uk: {
+    systemStatus: 'Стан системи',
+    serverUnavailable: 'Сервер недоступний',
+    loading: 'Завантаження...',
+    storage: 'Сховище',
+    systemDisk: 'Системний диск',
+    used: 'Використано',
+    total: 'Усього'
+  },
+  ru: {
+    systemStatus: 'Состояние системы',
+    serverUnavailable: 'Сервер недоступен',
+    loading: 'Загрузка...',
+    storage: 'Хранилище',
+    systemDisk: 'Системный диск',
+    used: 'Использовано',
+    total: 'Всего'
+  }
+};
+const t = i18n[lang] || i18n.en;
+
 const parse = (out) => {
   const d = {
     cpu: 0, ram: 0, ramUsed: '0', ramTotal: '0',
-    temp: 0, power: '--', hddTemp: '--',
-    diskRoot: {u:0,t:0,p:0}, diskData: {u:0,t:0,p:0},
+    temp: 0, power: '--',
+    disks: [],
     containers: [], error: null
   };
   if (!out) return d;
@@ -238,14 +271,21 @@ const parse = (out) => {
     else if (line.startsWith('RAM_TOTAL:')) d.ramTotal = line.split(':')[1] || '0';
     else if (line.startsWith('TEMP:')) d.temp = parseInt(line.split(':')[1]) || 0;
     else if (line.startsWith('POWER:')) d.power = line.split(':')[1] || '--';
-    else if (line.startsWith('HDD_TEMP:')) d.hddTemp = line.split(':')[1] || '--';
-    else if (line.startsWith('DISK_ROOT:')) {
-      const [u, t, p] = line.replace('DISK_ROOT:', '').trim().split(' ');
-      d.diskRoot = { u: parseInt(u)||0, t: parseInt(t)||0, p: parseInt(p)||0 };
-    }
-    else if (line.startsWith('DISK_DATA:')) {
-      const [u, t, p] = line.replace('DISK_DATA:', '').trim().split(' ');
-      d.diskData = { u: parseInt(u)||0, t: parseInt(t)||0, p: parseInt(p)||0 };
+    else if (line.startsWith('DISK:')) {
+      const parts = line.split(':');
+      if (parts.length >= 5) {
+        const [, name, mount, info, temp] = parts;
+        const [u, t, p] = (info || '').split(' ');
+        d.disks.push({
+          name: name || 'Disk',
+          mount: mount || '/',
+          used: parseInt(u) || 0,
+          total: parseInt(t) || 0,
+          percent: parseInt(p) || 0,
+          temp: temp || '--',
+          isSystem: mount === '/'
+        });
+      }
     }
     else if (line.startsWith('CONTAINER:')) {
       const p = line.split(':');
@@ -293,7 +333,7 @@ const diskCol = (p) => p > 85 ? '#ff6b6b' : p > 70 ? '#fbbf24' : '#4ade80';
 
 export const render = ({ output, activeTab, collapsed }, dispatch) => {
   if (!output || !output.trim()) {
-    return <div className="widget"><div className="offline">🔌 Server unavailable</div></div>;
+    return <div className="widget"><div className="offline">🔌 {t.serverUnavailable}</div></div>;
   }
 
   const d = parse(output);
@@ -302,17 +342,14 @@ export const render = ({ output, activeTab, collapsed }, dispatch) => {
     return <div className="widget"><div className="error">⚠️ {d.error}</div></div>;
   }
 
-  const rootP = d.diskRoot.p || (d.diskRoot.t > 0 ? (d.diskRoot.u / d.diskRoot.t) * 100 : 0);
-  const dataP = d.diskData.p || (d.diskData.t > 0 ? (d.diskData.u / d.diskData.t) * 100 : 0);
   const isCpu = activeTab === 'cpu';
-
   const cpuSub = d.power !== '--' ? `${d.power}W / ${d.temp}°C` : `${d.temp}°C`;
 
   if (collapsed) {
     return (
       <div className="widget">
         <div className="header" style={{borderBottom:'none'}}>
-          <span>System Status</span>
+          <span>{t.systemStatus}</span>
           <span
             style={{opacity:0.6,fontSize:12,cursor:'pointer',padding:'4px'}}
             onClick={() => dispatch({type:'TOGGLE_COLLAPSE'})}>▶</span>
@@ -324,7 +361,7 @@ export const render = ({ output, activeTab, collapsed }, dispatch) => {
   return (
     <div className="widget">
       <div className="header">
-        <span>System Status</span>
+        <span>{t.systemStatus}</span>
         <span
           style={{opacity:0.4,fontSize:12,cursor:'pointer',padding:'4px'}}
           onClick={() => dispatch({type:'TOGGLE_COLLAPSE'})}>▼</span>
@@ -354,41 +391,31 @@ export const render = ({ output, activeTab, collapsed }, dispatch) => {
               {isCpu ? c.cpu : c.mem}
             </span>
           </div>
-        )) : <div style={{opacity:0.4,fontSize:12,padding:'10px 0',textAlign:'center'}}>Loading...</div>}
+        )) : <div style={{opacity:0.4,fontSize:12,padding:'10px 0',textAlign:'center'}}>{t.loading}</div>}
       </div>
 
       <div className="storage-section">
         <div className="section-title">
-          <span>Storage</span>
+          <span>{t.storage}</span>
           <span style={{opacity:0.4}}>⚙️</span>
         </div>
-        <div className="disk-item">
-          <div className="disk-header">
-            <span className="disk-icon">💾</span>
-            <div className="disk-info">
-              <div className="disk-name">System Disk</div>
-              <div className="disk-usage">Used: {fmtBytes(d.diskRoot.u)} / Total: {fmtBytes(d.diskRoot.t)}</div>
-            </div>
-          </div>
-          <div className="progress-bar">
-            <div className="progress-fill" style={{width:`${rootP}%`,backgroundColor:diskCol(rootP)}} />
-          </div>
-        </div>
-
-        {d.diskData.t > 0 && (
-          <div className="disk-item">
+        {d.disks.map((disk, i) => (
+          <div key={i} className="disk-item">
             <div className="disk-header">
-              <span className="disk-icon">💿</span>
+              <span className="disk-icon">{disk.isSystem ? '💾' : '💿'}</span>
               <div className="disk-info">
-                <div className="disk-name">External Disk {d.hddTemp !== '--' && <span style={{opacity:0.5,fontSize:11,marginLeft:6}}>{d.hddTemp}°C</span>}</div>
-                <div className="disk-usage">Used: {fmtBytes(d.diskData.u)} / Total: {fmtBytes(d.diskData.t)}</div>
+                <div className="disk-name">
+                  {disk.isSystem ? t.systemDisk : disk.name}
+                  {disk.temp !== '--' && <span style={{opacity:0.5,fontSize:11,marginLeft:6}}>{disk.temp}°C</span>}
+                </div>
+                <div className="disk-usage">{t.used}: {fmtBytes(disk.used)} / {t.total}: {fmtBytes(disk.total)}</div>
               </div>
             </div>
             <div className="progress-bar">
-              <div className="progress-fill" style={{width:`${dataP}%`,backgroundColor:diskCol(dataP)}} />
+              <div className="progress-fill" style={{width:`${disk.percent}%`,backgroundColor:diskCol(disk.percent)}} />
             </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );

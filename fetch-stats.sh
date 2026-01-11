@@ -77,28 +77,40 @@ else
   power_w=\"--\"
 fi
 
-# Disks
+# System disk
 disk_root=\$(df / | tail -1 | awk '{print \$3*1024,\$2*1024,\$5}' | tr -d '%')
-disk_data=\"0 0 0\"
-if [ -n \"$EXTERNAL_DISK\" ] && [ -d \"$EXTERNAL_DISK\" ]; then
-  disk_data=\$(df \"$EXTERNAL_DISK\" 2>/dev/null | tail -1 | awk '{print \$3*1024,\$2*1024,\$5}' | tr -d '%' || echo \"0 0 0\")
-fi
-
-# HDD temperature via smartctl
-hdd_temp=\"--\"
-if [ -n \"$SUDO_PASS\" ]; then
-  hdd_temp=\$(echo \"$SUDO_PASS\" | sudo -S smartctl -A /dev/sda 2>/dev/null | awk '/Temperature_Celsius/ {print \$10}' || echo \"--\")
-fi
-
 echo \"CPU:\$cpu_usage\"
 echo \"RAM:\$ram_percent\"
 echo \"RAM_USED:\$ram_used_gb\"
 echo \"RAM_TOTAL:\$ram_total_gb\"
 echo \"TEMP:\$temp_c\"
 echo \"POWER:\$power_w\"
-echo \"DISK_ROOT:\$disk_root\"
-echo \"DISK_DATA:\$disk_data\"
-echo \"HDD_TEMP:\$hdd_temp\"
+echo \"DISK:System:/:\$disk_root:--\"
+
+# Auto-detect all mounted disks (excluding system, temp, boot)
+df -h | grep -E '^/dev/' | grep -v -E '(/boot|/efi|^/$)' | while read line; do
+  dev=\$(echo \"\$line\" | awk '{print \$1}')
+  mount=\$(echo \"\$line\" | awk '{print \$NF}')
+
+  # Skip root
+  if [ \"\$mount\" = \"/\" ]; then continue; fi
+
+  # Get disk info
+  info=\$(df \"\$mount\" | tail -1 | awk '{print \$3*1024,\$2*1024,\$5}' | tr -d '%')
+
+  # Get disk name from mount path
+  name=\$(basename \"\$mount\")
+
+  # Try to get temperature via smartctl
+  temp=\"--\"
+  if [ -n \"$SUDO_PASS\" ]; then
+    basedev=\$(echo \"\$dev\" | sed 's/[0-9]*$//')
+    temp=\$(echo \"$SUDO_PASS\" | sudo -S smartctl -A \"\$basedev\" 2>/dev/null | awk '/Temperature_Celsius/ {print \$10}')
+    [ -z \"\$temp\" ] && temp=\"--\"
+  fi
+
+  echo \"DISK:\$name:\$mount:\$info:\$temp\"
+done
 
 # Docker stats
 if [ -n \"$SUDO_PASS\" ]; then
