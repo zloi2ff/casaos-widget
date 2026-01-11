@@ -1,6 +1,6 @@
 {
   "name": "CasaOS Monitor",
-  "description": "Real-time system monitor widget for CasaOS servers. Displays CPU, RAM, Docker containers, storage, Tailscale status with themes support.",
+  "description": "Real-time CasaOS server monitor with clickable Docker apps, CPU/RAM stats, storage, Tailscale status, themes, and 20 languages.",
   "author": "zloi2ff",
   "version": "1.2.0",
   "homepage": "https://github.com/zloi2ff/casaos-widget"
