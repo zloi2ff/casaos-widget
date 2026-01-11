@@ -11,6 +11,7 @@ A beautiful macOS desktop widget that displays real-time system statistics from 
 - **CPU Usage** - Real-time CPU percentage with temperature
 - **RAM Usage** - Memory usage matching CasaOS calculations
 - **Docker Containers** - Dynamic list of running containers with CPU/RAM usage
+- **Clickable Apps** - Click container icon to open app in browser (auto-detects port)
 - **Storage** - Auto-detected disks with usage and temperature
 - **Tailscale Status** - Shows connection status, IP and hostname
 - **Quick Actions** - Restart containers with one click
@@ -103,6 +104,12 @@ The widget automatically detects all mounted disks on your server and displays:
 - Switch between CPU and RAM view with tabs
 - Sorted by memory usage
 - Collapsible apps section (click ▼ near tabs)
+
+### Clickable App Icons
+- Click any container icon to open its web UI in browser
+- Ports are auto-detected via `docker port` command
+- Priority: 8080 → 8xxx-9xxx → 3xxx → 80/443
+- No manual port configuration needed
 
 ### Quick Actions
 - Hover over a container to see the restart button
