@@ -236,15 +236,6 @@ const i18n = {
     systemDisk: 'Системний диск',
     used: 'Використано',
     total: 'Усього'
-  },
-  ru: {
-    systemStatus: 'Состояние системы',
-    serverUnavailable: 'Сервер недоступен',
-    loading: 'Загрузка...',
-    storage: 'Хранилище',
-    systemDisk: 'Системный диск',
-    used: 'Использовано',
-    total: 'Всего'
   }
 };
 const t = i18n[lang] || i18n.en;
