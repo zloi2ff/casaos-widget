@@ -5,6 +5,8 @@ export const refreshFrequency = 6000; // 6 seconds
 
 // Configuration - UPDATE THESE PATHS AND IP FOR YOUR SETUP
 const SERVER_IP = '192.168.31.73'; // Your CasaOS server IP
+const TAILSCALE_IP = '100.112.200.121'; // Your Tailscale IP (shown when server offline)
+const TAILSCALE_HOSTNAME = 'wyse5070'; // Your Tailscale hostname
 export const command = `/Users/Andrii/Library/Application\\ Support/Übersicht/widgets/fetch-stats.sh`;
 const actionScript = `/Users/Andrii/Library/Application\\ Support/Übersicht/widgets/docker-action.sh`;
 const openScript = `/tmp/open-app.sh`;
@@ -286,7 +288,14 @@ export const className = `
 `;
 
 // Theme modes: 'auto', 'dark', 'light'
-export const initialState = { activeTab: 'ram', output: '', collapsed: false, themeMode: 'auto', appsCollapsed: false, lastTailscale: null };
+// Load cached Tailscale from localStorage
+const getSavedTailscale = () => {
+  try {
+    const saved = localStorage.getItem('casaos_tailscale');
+    return saved ? JSON.parse(saved) : null;
+  } catch { return null; }
+};
+export const initialState = { activeTab: 'ram', output: '', collapsed: false, themeMode: 'auto', appsCollapsed: false, lastTailscale: getSavedTailscale() };
 
 export const updateState = (event, prev) => {
   if (event.type === 'UB/COMMAND_RAN') {
@@ -298,6 +307,8 @@ export const updateState = (event, prev) => {
         const p = tsLine.split(':');
         if (p.length >= 4 && p[2] !== '--') {
           lastTailscale = { online: p[1] === 'true', ip: p[2], hostname: p[3] };
+          // Save to localStorage for persistence
+          try { localStorage.setItem('casaos_tailscale', JSON.stringify(lastTailscale)); } catch {}
         }
       }
     }
@@ -671,16 +682,18 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed,
               onClick={() => dispatch({type:'CYCLE_THEME'})} title={`Theme: ${themeMode}`}>{themeIcon}</span>
           </div>
         </div>
-        <div className="offline" style={{padding:'20px'}}>🔌 {t.serverUnavailable}</div>
-        {lastTailscale && (
-          <div className="tailscale-section" style={{borderColor: th.border}}>
+        <div style={{padding:'15px 20px', textAlign:'center', opacity:0.6, fontSize:13}}>🔌 {t.serverUnavailable}</div>
+        {(lastTailscale || TAILSCALE_IP) && (
+          <div className="tailscale-section" style={{borderColor: th.border, borderTop: `1px solid ${th.border}`}}>
             <div className="ts-icon" style={{background: th.btnBg}}>🔗</div>
             <div className="ts-info">
               <div className="ts-title">
-                <span className="ts-status offline"></span>
+                <span style={{width:8,height:8,borderRadius:'50%',background:'#888',display:'inline-block',marginRight:6}}></span>
                 Tailscale
               </div>
-              <div className="ts-detail" style={{color: th.textMuted}}>{lastTailscale.ip} • {lastTailscale.hostname}</div>
+              <div className="ts-detail" style={{color: th.textMuted}}>
+                {lastTailscale ? lastTailscale.ip : TAILSCALE_IP} • {lastTailscale ? lastTailscale.hostname : TAILSCALE_HOSTNAME}
+              </div>
             </div>
           </div>
         )}
@@ -730,11 +743,6 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed,
           <Circle pct={d.cpu} color={cpuCol(d.cpu)} label="CPU" sub={cpuSub} theme={currentTheme} />
           <Circle pct={d.ram} color={ramCol(d.ram)} label="RAM" sub={`${d.ramUsed} GB`} theme={currentTheme} />
         </div>
-        {d.topProc.name !== '--' && d.topProc.cpu > 0 && (
-          <div style={{textAlign:'center', fontSize:11, opacity:0.5, marginTop:'-5px', paddingBottom:'10px'}}>
-            ⚡ {d.topProc.name}: {d.topProc.cpu.toFixed(1)}%
-          </div>
-        )}
       </div>
 
       <div className="tailscale-section" style={{borderColor: th.border}}>
@@ -757,24 +765,41 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed,
           <span style={{marginLeft: appsCollapsed ? 0 : 'auto', opacity:0.4, cursor:'pointer', fontSize: appsCollapsed ? 12 : 10}}
             onClick={() => dispatch({type:'TOGGLE_APPS'})}>{appsCollapsed ? '▶ Apps' : '▼'}</span>
         </div>
-        {!appsCollapsed && (d.containers.length > 0 ? d.containers.map((c, i) => (
-          <div key={i} className="app-item" style={{borderColor: th.border}}>
-            <div className="app-name">
-              {c.port ? (
-                <a href={`http://${SERVER_IP}:${c.port}`}
-                   className="app-icon"
-                   style={{textDecoration:'none', cursor:'pointer'}}
-                   title={`Open :${c.port}`}>{getIcon(c.name)}</a>
-              ) : (
-                <span className="app-icon">{getIcon(c.name)}</span>
-              )}
-              <span>{fmtName(c.name)}</span>
-            </div>
-            <span className={`app-stat ${isCpu ? 'cpu' : 'ram'}`}>
-              {isCpu ? c.cpu : c.mem}
-            </span>
-          </div>
-        )) : <div style={{opacity:0.4,fontSize:12,padding:'10px 0',textAlign:'center'}}>{t.loading}</div>)}
+        {!appsCollapsed && (d.containers.length > 0 ? (() => {
+          // Find container with highest CPU
+          const maxCpuIdx = d.containers.reduce((maxI, c, i, arr) =>
+            parseFloat(c.cpu) > parseFloat(arr[maxI].cpu) ? i : maxI, 0);
+          const maxCpu = parseFloat(d.containers[maxCpuIdx]?.cpu) || 0;
+          // Find container with highest RAM
+          const parseMem = (s) => { const n = parseFloat(s)||0; return s.includes('GiB') ? n*1024 : n; };
+          const maxRamIdx = d.containers.reduce((maxI, c, i, arr) =>
+            parseMem(c.mem) > parseMem(arr[maxI].mem) ? i : maxI, 0);
+          const maxRam = parseMem(d.containers[maxRamIdx]?.mem) || 0;
+          return d.containers.map((c, i) => {
+            const isTopCpu = isCpu && i === maxCpuIdx && maxCpu > 1;
+            const isTopRam = !isCpu && i === maxRamIdx && maxRam > 10;
+            const isTop = isTopCpu || isTopRam;
+            const bgColor = isTopCpu ? 'rgba(34,211,238,0.08)' : isTopRam ? 'rgba(74,222,128,0.08)' : 'transparent';
+            return (
+              <div key={i} className="app-item" style={{borderColor: th.border, background: bgColor}}>
+                <div className="app-name">
+                  {c.port ? (
+                    <a href={`http://${SERVER_IP}:${c.port}`}
+                       className="app-icon"
+                       style={{textDecoration:'none', cursor:'pointer'}}
+                       title={`Open :${c.port}`}>{getIcon(c.name)}</a>
+                  ) : (
+                    <span className="app-icon">{getIcon(c.name)}</span>
+                  )}
+                  <span>{fmtName(c.name)}{isTop && ' ⚡'}</span>
+                </div>
+                <span className={`app-stat ${isCpu ? 'cpu' : 'ram'}`}>
+                  {isCpu ? c.cpu : c.mem}
+                </span>
+              </div>
+            );
+          });
+        })() : <div style={{opacity:0.4,fontSize:12,padding:'10px 0',textAlign:'center'}}>{t.loading}</div>)}
       </div>
 
       <div className="storage-section" style={{background: th.sectionBg}}>
