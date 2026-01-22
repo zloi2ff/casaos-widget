@@ -805,7 +805,7 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed,
       <div className="storage-section" style={{background: th.sectionBg}}>
         <div className="section-title">
           <span>{t.storage}</span>
-          <span style={{opacity:0.4}}>⚙️</span>
+          <a href={`http://${SERVER_IP}`} style={{opacity:0.5, cursor:'pointer', textDecoration:'none'}} title="Open CasaOS">🖥️</a>
         </div>
         {d.disks.map((disk, i) => (
           <div key={i} className="disk-item" style={{background: th.cardBg}}>

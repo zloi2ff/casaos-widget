@@ -12,7 +12,7 @@ A beautiful macOS desktop widget that displays real-time system statistics from 
 - **Docker Containers** - Running containers with CPU/RAM stats (normalized to 100%)
 - **Top Consumer Highlight** - Most resource-intensive container highlighted with ⚡
 - **Clickable Apps** - Click container icon to open web UI (auto-detects port)
-- **Storage** - Auto-detected disks with usage and temperature
+- **Storage** - Auto-detected disks with usage and temperature (click 🖥️ to open CasaOS)
 - **Tailscale** - Connection status, IP and hostname (visible even when offline)
 - **Themes** - Light, Dark, and Auto (follows macOS)
 - **Collapsible** - Minimize widget or apps section
