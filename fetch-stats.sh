@@ -114,7 +114,16 @@ fi
 
 # Docker stats with ports
 for container in $(echo "saberuu3aa" | sudo -S docker ps --format "{{.Names}}" 2>/dev/null); do
-  stats=$(echo "saberuu3aa" | sudo -S docker stats --no-stream --format "{{.CPUPerc}}:{{.MemUsage}}" "$container" 2>/dev/null)
+  raw_stats=$(echo "saberuu3aa" | sudo -S docker stats --no-stream --format "{{.CPUPerc}}:{{.MemUsage}}" "$container" 2>/dev/null)
+  # Cap CPU at 100% (docker stats can exceed 100% on multi-core systems)
+  cpu_val=$(echo "$raw_stats" | cut -d: -f1 | tr -d '%')
+  mem_val=$(echo "$raw_stats" | cut -d: -f2)
+  if [ -n "$cpu_val" ]; then
+    cpu_capped=$(awk -v c="$cpu_val" "BEGIN {printf \"%.2f\", (c > 100) ? 100 : c}")
+    stats="${cpu_capped}%:${mem_val}"
+  else
+    stats="$raw_stats"
+  fi
   # Get web port - prioritize common web UI ports
   all_ports=$(echo "saberuu3aa" | sudo -S docker port "$container" 2>/dev/null | grep -oE "[0-9]+$" | sort -u)
   port="--"

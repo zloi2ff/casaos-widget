@@ -286,10 +286,23 @@ export const className = `
 `;
 
 // Theme modes: 'auto', 'dark', 'light'
-export const initialState = { activeTab: 'ram', output: '', collapsed: false, themeMode: 'auto', appsCollapsed: false };
+export const initialState = { activeTab: 'ram', output: '', collapsed: false, themeMode: 'auto', appsCollapsed: false, lastTailscale: null };
 
 export const updateState = (event, prev) => {
-  if (event.type === 'UB/COMMAND_RAN') return { ...prev, output: event.output };
+  if (event.type === 'UB/COMMAND_RAN') {
+    // Cache Tailscale info from output
+    let lastTailscale = prev.lastTailscale;
+    if (event.output) {
+      const tsLine = event.output.split('\n').find(l => l.startsWith('TAILSCALE:'));
+      if (tsLine) {
+        const p = tsLine.split(':');
+        if (p.length >= 4 && p[2] !== '--') {
+          lastTailscale = { online: p[1] === 'true', ip: p[2], hostname: p[3] };
+        }
+      }
+    }
+    return { ...prev, output: event.output, lastTailscale };
+  }
   if (event.type === 'TAB_CLICK') return { ...prev, activeTab: event.tab };
   if (event.type === 'TOGGLE_COLLAPSE') return { ...prev, collapsed: !prev.collapsed };
   if (event.type === 'TOGGLE_APPS') return { ...prev, appsCollapsed: !prev.appsCollapsed };
@@ -628,7 +641,7 @@ const cpuCol = (p) => p > 80 ? '#ff6b6b' : p > 50 ? '#fbbf24' : '#22d3ee';
 const ramCol = (p) => p > 80 ? '#ff6b6b' : p > 60 ? '#fbbf24' : '#4ade80';
 const diskCol = (p) => p > 85 ? '#ff6b6b' : p > 70 ? '#fbbf24' : '#4ade80';
 
-export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed }, dispatch) => {
+export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed, lastTailscale }, dispatch) => {
   // Resolve theme
   const currentTheme = themeMode === 'auto' ? getSystemTheme() : themeMode;
   const th = themes[currentTheme];
@@ -642,7 +655,30 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed 
   };
 
   if (!output || !output.trim()) {
-    return <div className="widget" style={widgetStyle}><div className="offline">🔌 {t.serverUnavailable}</div></div>;
+    return (
+      <div className="widget" style={widgetStyle}>
+        <div className="header" style={{borderColor: th.border}}>
+          <span>{t.systemStatus}</span>
+          <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
+            <span style={{opacity:0.5,fontSize:12,cursor:'pointer',padding:'4px'}}
+              onClick={() => dispatch({type:'CYCLE_THEME'})} title={`Theme: ${themeMode}`}>{themeIcon}</span>
+          </div>
+        </div>
+        <div className="offline" style={{padding:'20px'}}>🔌 {t.serverUnavailable}</div>
+        {lastTailscale && (
+          <div className="tailscale-section" style={{borderColor: th.border}}>
+            <div className="ts-icon" style={{background: th.btnBg}}>🔗</div>
+            <div className="ts-info">
+              <div className="ts-title">
+                <span className="ts-status offline"></span>
+                Tailscale
+              </div>
+              <div className="ts-detail" style={{color: th.textMuted}}>{lastTailscale.ip} • {lastTailscale.hostname}</div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   }
 
   const d = parse(output);
