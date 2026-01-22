@@ -3,3 +3,4 @@ config.sh
 
 # macOS
 .DS_Store
+.claude/
