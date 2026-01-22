@@ -549,6 +549,7 @@ const parse = (out) => {
   const d = {
     cpu: 0, ram: 0, ramUsed: '0', ramTotal: '0',
     temp: 0, power: '--',
+    topProc: { name: '--', cpu: 0 },
     disks: [],
     containers: [], error: null,
     tailscale: { online: false, ip: '--', hostname: '--' }
@@ -568,6 +569,12 @@ const parse = (out) => {
     else if (line.startsWith('RAM_TOTAL:')) d.ramTotal = line.split(':')[1] || '0';
     else if (line.startsWith('TEMP:')) d.temp = parseInt(line.split(':')[1]) || 0;
     else if (line.startsWith('POWER:')) d.power = line.split(':')[1] || '--';
+    else if (line.startsWith('TOP_PROC:')) {
+      const p = line.split(':');
+      if (p.length >= 3) {
+        d.topProc = { name: p[1] || '--', cpu: parseFloat(p[2]) || 0 };
+      }
+    }
     else if (line.startsWith('DISK:')) {
       const parts = line.split(':');
       if (parts.length >= 5) {
@@ -723,6 +730,11 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed,
           <Circle pct={d.cpu} color={cpuCol(d.cpu)} label="CPU" sub={cpuSub} theme={currentTheme} />
           <Circle pct={d.ram} color={ramCol(d.ram)} label="RAM" sub={`${d.ramUsed} GB`} theme={currentTheme} />
         </div>
+        {d.topProc.name !== '--' && d.topProc.cpu > 0 && (
+          <div style={{textAlign:'center', fontSize:11, opacity:0.5, marginTop:'-5px', paddingBottom:'10px'}}>
+            ⚡ {d.topProc.name}: {d.topProc.cpu.toFixed(1)}%
+          </div>
+        )}
       </div>
 
       <div className="tailscale-section" style={{borderColor: th.border}}>

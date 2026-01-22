@@ -57,6 +57,10 @@ else
   power_w="--"
 fi
 
+# Top CPU process (exclude ps/grep/awk and system processes)
+top_proc=$(ps -eo pcpu,comm --no-headers --sort=-pcpu 2>/dev/null | grep -v -E "^[[:space:]]*(ps|grep|awk|head|sort|sed)" | grep -v -E "[[:space:]]+(ps|grep|awk)$" | head -1 | awk "{gsub(/^ +/, \"\"); cpu=\$1; name=\$2; if(cpu+0 < 0.1) {name=\"--\"; cpu=0}; printf \"%s:%s\", name, cpu}")
+[ -z "$top_proc" ] && top_proc="--:0"
+
 # System info output
 echo "CPU:$cpu_usage"
 echo "RAM:$ram_percent"
@@ -64,6 +68,7 @@ echo "RAM_USED:$ram_used_gb"
 echo "RAM_TOTAL:$ram_total_gb"
 echo "TEMP:$temp_c"
 echo "POWER:$power_w"
+echo "TOP_PROC:$top_proc"
 
 # System disk
 disk_root=$(df / | tail -1 | awk "{print \$3*1024,\$2*1024,\$5}" | tr -d "%")
