@@ -179,16 +179,16 @@ export const className = `
   .section-title {
     font-size: 14px;
     font-weight: 600;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     display: flex;
     justify-content: space-between;
   }
 
   .disk-item {
     background: rgba(255,255,255,0.025);
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 5px;
   }
 
   .disk-item:last-child { margin-bottom: 0; }
@@ -196,20 +196,20 @@ export const className = `
   .disk-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
+    gap: 10px;
+    margin-bottom: 6px;
   }
 
-  .disk-icon { font-size: 20px; }
+  .disk-icon { font-size: 18px; }
   .disk-info { flex: 1; }
-  .disk-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
-  .disk-usage { font-size: 11px; opacity: 0.5; }
+  .disk-name { font-size: 13px; font-weight: 500; }
+  .disk-usage { font-size: 10px; opacity: 0.5; }
 
   .progress-bar {
     width: 100%;
-    height: 5px;
+    height: 4px;
     background: rgba(255,255,255,0.08);
-    border-radius: 3px;
+    border-radius: 2px;
     overflow: hidden;
   }
 
@@ -234,10 +234,10 @@ export const className = `
   }
 
   .tailscale-section {
-    padding: 12px 20px;
+    padding: 14px 20px;
     border-top: 1px solid rgba(255,255,255,0.05);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
   }
 
@@ -250,10 +250,12 @@ export const className = `
     justify-content: center;
     background: rgba(255,255,255,0.05);
     border-radius: 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
 
-  .ts-info { flex: 1; }
-  .ts-title { font-size: 12px; font-weight: 500; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+  .ts-info { flex: 1; min-width: 0; }
+  .ts-title { font-size: 12px; font-weight: 500; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
   .ts-detail { font-size: 11px; opacity: 0.5; }
 
   .ts-status {
@@ -326,7 +328,7 @@ export const updateState = (event, prev) => {
 };
 
 const icons = {
-  jellyfin: '🎬', qbittorrent: '📥', adguard: '🛡️', tailscale: '🔗',
+  jellyfin: '🎬', qbittorrent: '📥', adguard: '🛡️', tailscale: '🌐',
   plex: '🎬', nginx: '🌐', portainer: '🐳', homeassistant: '🏠',
   sonarr: '📺', radarr: '🎥', prowlarr: '🔍', transmission: '📥',
   nextcloud: '☁️', pihole: '🛡️', grafana: '📊', prometheus: '📈'
@@ -358,6 +360,13 @@ const getAppUrl = (name, serverIp) => {
 
 
 const fmtName = (n) => n.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+// Clean up devmon disk names: "sdb1-scsi-1JMicron_Generi" → "JMicron"
+const fmtDiskName = (n) => {
+  if (!n || n === 'System') return n;
+  const m = n.match(/(?:scsi-\d*|mmc-)([A-Za-z]+)/);
+  if (m) return m[1].replace(/_/g, ' ');
+  return n.split('-')[0];
+};
 // Use decimal (SI) units like CasaOS: 1 GB = 1000^3 bytes
 const fmtBytes = (b) => b >= 1000000000 ? `${(b/1000000000).toFixed(2)} GB` : `${Math.round(b/1000000)} MB`;
 
@@ -685,7 +694,11 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed,
         <div style={{padding:'15px 20px', textAlign:'center', opacity:0.6, fontSize:13}}>🔌 {t.serverUnavailable}</div>
         {(lastTailscale || TAILSCALE_IP) && (
           <div className="tailscale-section" style={{borderColor: th.border, borderTop: `1px solid ${th.border}`}}>
-            <div className="ts-icon" style={{background: th.btnBg}}>🔗</div>
+            <div className="ts-icon" style={{
+              background: th.btnBg,
+              color: '#888',
+              fontSize: 13, fontWeight: 700, letterSpacing: -0.5
+            }}>TS</div>
             <div className="ts-info">
               <div className="ts-title">
                 <span style={{width:8,height:8,borderRadius:'50%',background:'#888',display:'inline-block',marginRight:6}}></span>
@@ -746,13 +759,13 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed,
       </div>
 
       <div className="tailscale-section" style={{borderColor: th.border}}>
-        <div className="ts-icon" style={{background: th.btnBg}}>🔗</div>
+        <div className="ts-icon" style={{background: th.btnBg, color: d.tailscale.online ? '#4ade80' : '#888', fontSize: 13, fontWeight: 700, letterSpacing: -0.5}}>TS</div>
         <div className="ts-info">
           <div className="ts-title">
-            <span className={`ts-status ${d.tailscale.online ? 'online' : 'offline'}`}></span>
+            <span style={{width:8,height:8,borderRadius:'50%',background: d.tailscale.online ? '#4ade80' : '#ff6b6b',display:'inline-block',marginRight:6}}></span>
             Tailscale
           </div>
-          <div className="ts-detail" style={{color: th.textMuted}}>{d.tailscale.ip} • {d.tailscale.hostname}</div>
+          <div style={{fontSize: 11, opacity: 1, color: currentTheme === 'light' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)'}}>{d.tailscale.ip} • {d.tailscale.hostname}</div>
         </div>
       </div>
 
@@ -807,16 +820,16 @@ export const render = ({ output, activeTab, collapsed, themeMode, appsCollapsed,
           <span>{t.storage}</span>
           <a href={`http://${SERVER_IP}`} style={{opacity:0.5, cursor:'pointer', textDecoration:'none'}} title="Open CasaOS">🖥️</a>
         </div>
-        {d.disks.map((disk, i) => (
-          <div key={i} className="disk-item" style={{background: th.cardBg}}>
+        {d.disks.filter(disk => disk.total >= 1000000000).map((disk, i) => (
+          <div key={i} className="disk-item">
             <div className="disk-header">
               <span className="disk-icon">{disk.isSystem ? '💾' : '💿'}</span>
               <div className="disk-info">
                 <div className="disk-name" style={{color: th.text}}>
-                  {disk.isSystem ? t.systemDisk : disk.name}
-                  {disk.temp !== '--' && <span style={{opacity:0.7,fontSize:11,marginLeft:6}}>{disk.temp}°C</span>}
+                  {disk.isSystem ? t.systemDisk : fmtDiskName(disk.name)}
+                  {disk.temp !== '--' && <span style={{opacity:0.5,fontSize:10,marginLeft:4}}>{disk.temp}°C</span>}
                 </div>
-                <div className="disk-usage" style={{color: th.text, opacity: 0.7}}>{t.used}: {fmtBytes(disk.used)} / {t.total}: {fmtBytes(disk.total)}</div>
+                <div className="disk-usage" style={{color: th.text, opacity: 0.5}}>{disk.percent}% • {fmtBytes(disk.used)} / {fmtBytes(disk.total)}</div>
               </div>
             </div>
             <div className="progress-bar" style={{background: th.btnBg}}>

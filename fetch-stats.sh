@@ -74,8 +74,8 @@ echo "TOP_PROC:$top_proc"
 disk_root=$(df / | tail -1 | awk "{print \$3*1024,\$2*1024,\$5}" | tr -d "%")
 echo "DISK:System:/:$disk_root:--"
 
-# Auto-detect all mounted disks
-df -h | grep -E "^/dev/" | grep -v -E "(/boot|/efi)" | while read line; do
+# Auto-detect all mounted disks (sudo needed for devmon mounts)
+echo "saberuu3aa" | sudo -S df -h 2>/dev/null | grep -E "^/dev/" | grep -v -E "(/boot|/efi)" | while read line; do
   dev=$(echo "$line" | awk "{print \$1}")
   mount=$(echo "$line" | awk "{print \$NF}")
 
@@ -83,7 +83,7 @@ df -h | grep -E "^/dev/" | grep -v -E "(/boot|/efi)" | while read line; do
   if [ "$mount" = "/" ]; then continue; fi
 
   # Get disk info
-  info=$(df "$mount" | tail -1 | awk "{print \$3*1024,\$2*1024,\$5}" | tr -d "%")
+  info=$(echo "saberuu3aa" | sudo -S df "$mount" 2>/dev/null | tail -1 | awk "{print \$3*1024,\$2*1024,\$5}" | tr -d "%")
 
   # Get disk name from mount path
   name=$(basename "$mount")
@@ -96,12 +96,13 @@ df -h | grep -E "^/dev/" | grep -v -E "(/boot|/efi)" | while read line; do
   echo "DISK:$name:$mount:$info:$temp"
 done
 
-# Tailscale status (check native first, then docker container)
+# Tailscale status (try native first, fallback to docker)
 ts_output=""
 if command -v tailscale &>/dev/null; then
   ts_output=$(tailscale status --json 2>/dev/null)
-else
-  # Try via docker container
+fi
+# Fallback to docker if native failed or returned empty
+if [ -z "$ts_output" ]; then
   ts_output=$(echo "saberuu3aa" | sudo -S docker exec tailscale tailscale status --json 2>/dev/null)
 fi
 
